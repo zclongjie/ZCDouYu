@@ -13,16 +13,17 @@ private let kTitleViewH : CGFloat = 40
 class HomeViewController: UIViewController {
     //懒加载属性
     private lazy var pageTitleView : PageTitleView = {
-        let titleFrame = CGRect(x: 0, y: kStatusBarH + kNavvigationBarH, width: kScreenW, height: kTitleViewH)
+        let titleFrame = CGRect(x: 0, y: kStatusBarH + kNavigationBarH, width: kScreenW, height: kTitleViewH)
         let titles = ["推荐", "游戏", "娱乐", "趣玩"];
         let titleView = PageTitleView(frame: titleFrame, titles: titles)
+        titleView.delegate = self
         return titleView
     }()
     
     private lazy var pageContentView : PageContentView = {[weak self] in
         //1.确定内容的frame
-        let contentH = kScreenH - kStatusBarH - kNavvigationBarH - kTitleViewH
-        let contentFrame = CGRect(x: 0, y: kStatusBarH + kNavvigationBarH + kTitleViewH, width: kScreenW, height: contentH)
+        let contentH = kScreenH - kStatusBarH - kNavigationBarH - kTitleViewH
+        let contentFrame = CGRect(x: 0, y: kStatusBarH + kNavigationBarH + kTitleViewH, width: kScreenW, height: contentH)
         
         //2.确定所有子控制器
         var childVcs = [UIViewController]()
@@ -33,6 +34,7 @@ class HomeViewController: UIViewController {
         }
         
         let contentView = PageContentView(frame: contentFrame, childcs: childVcs, parentViewController: self)
+        contentView.delegate = self
         return contentView
         
     }()
@@ -78,6 +80,20 @@ extension HomeViewController {
         let qrcodeItem = UIBarButtonItem(imageName: "Image_scan", highImageName: "Image_scan_click", size: size)
         
         navigationItem.rightBarButtonItems = [historyItem,searchItem,qrcodeItem]
+    }
+}
+
+//遵守PageTitleViewDelegate协议
+extension HomeViewController : PageTitleViewDelegate {
+    func pageTitleView(titleView: PageTitleView, selectIndex index: Int) {
+        pageContentView.setCurrentIndex(index)
+    }
+}
+
+//遵守PageContentDelegate协议
+extension HomeViewController : PageContentViewDelegate {
+    func pageContentView(contentView: PageContentView, progress: CGFloat, sourceIndex: Int, targetIndex: Int) {
+        pageTitleView.setTitleWithProgress(progress, sourceIndex: sourceIndex, targetIndex: targetIndex)
     }
 }
 
